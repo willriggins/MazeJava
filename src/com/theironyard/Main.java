@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 public class Main {
 
     static final int SIZE = 10;
+    static ArrayList<Room> roomsForX = new ArrayList<>(); // need an arraylist of Room objects to be able to compare to current room you're in
 
     static Room[][] createRooms() {
         Room[][] rooms = new Room[SIZE][SIZE];
@@ -55,6 +56,7 @@ public class Main {
             int index = r.nextInt(neighbors.size()); // this is exclusive
             return neighbors.get(index);
         }
+
         return null;
     }
 
@@ -81,18 +83,22 @@ public class Main {
         room.wasVisited = true;
         Room nextRoom = randomNeighbor(rooms, room.row, room.col);
         if (nextRoom == null) {
+            roomsForX.add(room); // add in room if next room is null
             return false;
         }
         tearDownWall(room, nextRoom);
         //here's where we get to recursion: calling the method inside it self at this point.
 
-        while (createMaze(rooms, nextRoom));
+        while (createMaze(rooms, nextRoom)) ;
         return true;
     }
 
 
     public static void main(String[] args) {
+        boolean start = true;
+        boolean firstEnd = false;
         Room[][] rooms = createRooms();
+
         createMaze(rooms, rooms[0][0]);
         for (Room[] row : rooms) {
             System.out.print(" _");
@@ -101,10 +107,22 @@ public class Main {
         for (Room[] row : rooms) {
             System.out.print("|");
             for (Room room : row) {
-                System.out.print(room.hasBottom ? "_" : " ");
+                if (start) {
+                    System.out.print("o");
+                    start = false;
+                }
+                else if (room == roomsForX.get(0) && !firstEnd) { // check for first dead end
+                    System.out.print("x"); //
+                    firstEnd = true;
+                }
+                else {
+                    System.out.print(room.hasBottom ? "_" : " ");//moved into else since "o" can't sit on top of an underscore
+                }
                 System.out.print(room.hasRight ? "|" : " "); // inline conditional. if it has right, print pipe. if not, print space.
+
             }
-            System.out.println();
+                System.out.println();
+            }
         }
     }
-}
+
